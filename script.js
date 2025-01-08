@@ -47,9 +47,11 @@ function handleCellClick(row, col) {
     appState.currentMoveIndex++;;
 
     if (checkWinner(board)) {
+        Swal.fire(`${currentPlayer} wins!`);
         messageElement.textContent = `${currentPlayer} wins!`;
         toggleHistoryButtons(true);
     } else if (isDraw(board)) {
+        Swal.fire('It\'s a draw!');
         messageElement.textContent = 'It\'s a draw!';
         toggleHistoryButtons(true);
     } else {
