@@ -17,9 +17,27 @@ const resetButton = document.querySelector('.reset');
 
 function renderBoard() {
 
-    messageElement.textContent = appState.currentPlayer ? `Player ${appState.currentPlayer}\'s turn` : `Choose a player`;
+    const { board, currentPlayer, moves } = appState;
+
+    if(moves.length !== 0){
+        appState.currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    }
+
+    if(currentPlayer === null) {
+        messageElement.textContent = `Choose a player`;
+    } else if (checkWinner(board)) {
+        Swal.fire(`${currentPlayer} wins!`);
+        messageElement.textContent = `${currentPlayer} wins!`;
+        toggleHistoryButtons(true);
+    } else if (isDraw(board)) {
+        Swal.fire('It\'s a draw!');
+        messageElement.textContent = 'It\'s a draw!';
+        toggleHistoryButtons(true); 
+    } else {
+        messageElement.textContent = `Player ${appState.currentPlayer}\'s turn`;
+    }
+
     boardElement.innerHTML = '';
-    const { board } = appState;
     board.forEach((row, rowIndex) => {
         const rowElement = document.createElement('div');
         rowElement.classList.add('row');
@@ -40,24 +58,10 @@ function handleCellClick(row, col) {
     if (board[row][col] !== '' || checkWinner(board)) return;
     
     board[row][col] = currentPlayer;
-
     const copyBoard = board.map(row => [...row]);
 
     appState.moves.push(copyBoard);
     appState.currentMoveIndex++;;
-
-    if (checkWinner(board)) {
-        Swal.fire(`${currentPlayer} wins!`);
-        messageElement.textContent = `${currentPlayer} wins!`;
-        toggleHistoryButtons(true);
-    } else if (isDraw(board)) {
-        Swal.fire('It\'s a draw!');
-        messageElement.textContent = 'It\'s a draw!';
-        toggleHistoryButtons(true);
-    } else {
-        appState.currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        messageElement.textContent = `Player ${appState.currentPlayer}\'s turn`;
-    }
 
     renderBoard();
     updateHistoryButtons();
@@ -142,8 +146,6 @@ previousButton.addEventListener('click', showPreviousMove);
 nextButton.addEventListener('click', showNextMove);
 resetButton.addEventListener('click', loadSA);
 
-loadSA();
-
 async function loadSA(){
     resetGame();
     const inputOptions = {
@@ -165,4 +167,7 @@ async function loadSA(){
     renderBoard();
     }
 }
+
+loadSA();
+
 
