@@ -6,7 +6,8 @@ const appState = {
     ],
     moves: [],
     currentPlayer: null,
-    currentMoveIndex: -1    
+    currentMoveIndex: -1,
+    winner: null    
 };
 
 const boardElement = document.querySelector('.board');
@@ -26,11 +27,11 @@ function renderBoard() {
     if(currentPlayer === null) {
         messageElement.textContent = `Choose a player`;
     } else if (checkWinner(board)) {
-        Swal.fire(`${currentPlayer} wins!`);
+        Swal.fire({text: `${currentPlayer} wins!`, heightAuto: false});
         messageElement.textContent = `${currentPlayer} wins!`;
         toggleHistoryButtons(true);
     } else if (isDraw(board)) {
-        Swal.fire('It\'s a draw!');
+        Swal.fire({text: 'It\'s a draw!', heightAuto: false});
         messageElement.textContent = 'It\'s a draw!';
         toggleHistoryButtons(true); 
     } else {
@@ -45,6 +46,9 @@ function renderBoard() {
             const cellElement = document.createElement('div');
             cellElement.classList.add('cell');
             cellElement.textContent = cell;
+            let cellStyle = cell === "X" ? 'cellX' : 'cellO';
+            
+            cellElement.classList.add(cellStyle);
             cellElement.addEventListener('click', () => handleCellClick(rowIndex, colIndex));
             rowElement.appendChild(cellElement);
         });
@@ -53,9 +57,9 @@ function renderBoard() {
 }
 
 function handleCellClick(row, col) {
-    const { board, currentPlayer } = appState;
+    const { board, currentPlayer, winner } = appState;
 
-    if (board[row][col] !== '' || checkWinner(board)) return;
+    if (board[row][col] !== '' || checkWinner(board) || winner) return;
     
     board[row][col] = currentPlayer;
     const copyBoard = board.map(row => [...row]);
@@ -87,6 +91,7 @@ function checkWinner(board) {
         if (board[a[0]][a[1]] && 
             board[a[0]][a[1]] === board[b[0]][b[1]] && 
             board[a[0]][a[1]] === board[c[0]][c[1]]) {
+            appState.winner = board[a[0]][a[1]];
             return true;
         }
     }
@@ -126,6 +131,7 @@ function resetGame() {
     appState.moves = [];
     appState.currentMoveIndex = -1;
     appState.currentPlayer = null;
+    appState.winner = null;
 
     toggleHistoryButtons(false);
     renderBoard();
@@ -156,6 +162,8 @@ async function loadSA(){
     title: "Select player",
     input: "radio",
     inputOptions,
+    allowOutsideClick: false,
+    heightAuto: false,
     inputValidator: (value) => {
         if (!value) {
         return "You need to choose something!";
